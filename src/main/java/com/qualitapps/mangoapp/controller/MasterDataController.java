@@ -3,7 +3,9 @@ package com.qualitapps.mangoapp.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,10 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.qualitapps.mangoapp.dto.ModuleDTO;
 import com.qualitapps.mangoapp.dto.ResponseDTO;
 import com.qualitapps.mangoapp.entities.MasterData;
 import com.qualitapps.mangoapp.service.MasterDataService;
 
+@CrossOrigin(origins = { "http://localhost:3000" })
 @RestController
 @RequestMapping("/api/v1/masterData")
 public class MasterDataController {
@@ -67,7 +71,7 @@ public class MasterDataController {
     }
 
     @DeleteMapping("/deleteMasterData")
-    public ResponseEntity<ResponseDTO> deleteMasterData(@RequestParam Integer masterDataId) {
+    public ResponseEntity<ResponseDTO> deleteMasterData(@RequestParam("masterDataId") Integer masterDataId) {
         
         ResponseEntity<Boolean> isExist = masterDataService.deleteMasterData(masterDataId);
         ResponseDTO responseDTO = ResponseDTO.builder()
@@ -106,6 +110,29 @@ public class MasterDataController {
                 .build();
             
         return new ResponseEntity<ResponseDTO>(responseDTO, allMasterData.getStatusCode());
+    }
+
+    @GetMapping("/getMasterDataById")
+    public ResponseEntity<ResponseDTO> getMasterDataById(@RequestParam(value = "moduleId") Integer id) {
+        try {
+            ResponseEntity<ModuleDTO> module = masterDataService.getMasterDataById(id);
+            ResponseDTO responseDTO = ResponseDTO.builder()
+                .path("/getMasterDataById")
+                .status(module.getStatusCode().value())
+                .version("v1")
+                .response(module.getBody())
+                .build();
+            
+            return new ResponseEntity<ResponseDTO>(responseDTO, module.getStatusCode());
+        } catch (Exception e) {
+            ResponseDTO responseDTO = ResponseDTO.builder()
+                .path("/getMasterDataById")
+                .status(HttpStatus.BAD_REQUEST.value())
+                .version("v1")
+                .response(e.getMessage())
+                .build();
+            return new ResponseEntity<ResponseDTO>(responseDTO, HttpStatus.BAD_REQUEST);
+        }        
     }
     
 }

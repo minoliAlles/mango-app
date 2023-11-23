@@ -3,7 +3,9 @@ package com.qualitapps.mangoapp.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,10 +15,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.qualitapps.mangoapp.dto.CategoryDTO;
+import com.qualitapps.mangoapp.dto.ModuleDTO;
 import com.qualitapps.mangoapp.dto.ResponseDTO;
 import com.qualitapps.mangoapp.entities.Category;
 import com.qualitapps.mangoapp.service.CategoryService;
-
+@CrossOrigin(origins = { "http://localhost:3000" })
 @RestController
 @RequestMapping("/api/v1/category")
 public class CategoryController {
@@ -67,7 +71,7 @@ public class CategoryController {
     }
 
     @DeleteMapping("/deleteCategory")
-    public ResponseEntity<ResponseDTO> deleteCategory(@RequestParam Integer categoryId) {
+    public ResponseEntity<ResponseDTO> deleteCategory(@RequestParam(value="categoryId") Integer categoryId) {
         
         ResponseEntity<Boolean> isExist = categoryService.deleteCategory(categoryId);
         ResponseDTO responseDTO = ResponseDTO.builder()
@@ -78,5 +82,28 @@ public class CategoryController {
                 .build();
             
         return new ResponseEntity<ResponseDTO>(responseDTO, isExist.getStatusCode());
+    }
+
+    @GetMapping("/getCategoryById")
+    public ResponseEntity<ResponseDTO> getCategoryById(@RequestParam(value = "categoryId") Integer id) {
+        try {
+            ResponseEntity<CategoryDTO> category = categoryService.getCategoryById(id);
+            ResponseDTO responseDTO = ResponseDTO.builder()
+                .path("/getCategoryById")
+                .status(category.getStatusCode().value())
+                .version("v1")
+                .response(category.getBody())
+                .build();
+            
+            return new ResponseEntity<ResponseDTO>(responseDTO, category.getStatusCode());
+        } catch (Exception e) {
+            ResponseDTO responseDTO = ResponseDTO.builder()
+                .path("/getCategoryById")
+                .status(HttpStatus.BAD_REQUEST.value())
+                .version("v1")
+                .response(e.getMessage())
+                .build();
+            return new ResponseEntity<ResponseDTO>(responseDTO, HttpStatus.BAD_REQUEST);
+        }        
     }
 }

@@ -96,6 +96,22 @@ public class ModuleService {
                                 HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<Boolean>(isDelete,httpStatus);
+    }
+
+    public ResponseEntity<ModuleDTO> getModuleById(Integer id) throws AppServiceException {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        ModuleDTO modulesDto = null;
+        try {
+            Optional<Module> module = moduleRepository.findById(id);
+            modulesDto = mapper.apply(module.get());
+            httpStatus= HttpStatus.OK;
+
+            return new ResponseEntity<ModuleDTO>(modulesDto, httpStatus);
+        } catch (Exception e) {
+            throw new AppServiceException("ERROR OCCURED RETRIEVING MODULE DATA!!", 
+                                e.getMessage(), 
+                                HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }   
 
 }

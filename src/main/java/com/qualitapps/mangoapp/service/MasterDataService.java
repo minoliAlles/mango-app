@@ -10,7 +10,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.qualitapps.mangoapp.dto.MasterDataDTO;
+import com.qualitapps.mangoapp.dto.ModuleDTO;
 import com.qualitapps.mangoapp.entities.MasterData;
+import com.qualitapps.mangoapp.exception.AppServiceException;
+import com.qualitapps.mangoapp.mapper.MasterDataMapper;
 import com.qualitapps.mangoapp.repository.MasterDataRepository;
 
 @Service
@@ -18,6 +22,9 @@ public class MasterDataService {
 
     @Autowired
     private MasterDataRepository repository;
+
+    @Autowired
+    private MasterDataMapper mapper;
 
     public ResponseEntity<List<MasterData>> getAllMasterData() {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
@@ -106,6 +113,22 @@ public class MasterDataService {
         }
         
         return new ResponseEntity<List<MasterData>>(allData, httpStatus);
+    }
+
+    public ResponseEntity<MasterDataDTO> getMasterDataById(Integer id) throws AppServiceException {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        MasterDataDTO masterDataDTO = null;
+        try {
+            Optional<MasterData> masterData = repository.findById(id);
+            masterDataDTO = mapper.apply(masterData.get());
+            httpStatus= HttpStatus.OK;
+
+            return new ResponseEntity<MasterDataDTO>(masterDataDTO, httpStatus);
+        } catch (Exception e) {
+            throw new AppServiceException("ERROR OCCURED RETRIEVING MODULE DATA!!", 
+                                e.getMessage(), 
+                                HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
     
 }

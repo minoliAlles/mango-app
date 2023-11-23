@@ -10,7 +10,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.qualitapps.mangoapp.dto.CategoryDTO;
+import com.qualitapps.mangoapp.dto.ModuleDTO;
 import com.qualitapps.mangoapp.entities.Category;
+import com.qualitapps.mangoapp.exception.AppServiceException;
+import com.qualitapps.mangoapp.mapper.CategoryMapper;
 import com.qualitapps.mangoapp.repository.CategoryRepository;
 
 @Service
@@ -18,6 +22,9 @@ public class CategoryService {
 
     @Autowired
     private CategoryRepository categoryRepository;
+
+    @Autowired
+    private CategoryMapper mapper;
 
     public ResponseEntity<List<Category>> getAllCategories() {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
@@ -81,6 +88,22 @@ public class CategoryService {
            e.printStackTrace();
         }
         return new ResponseEntity<Boolean>(isDelete,httpStatus);
+    }
+
+    public ResponseEntity<CategoryDTO> getCategoryById(Integer id) throws AppServiceException {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        CategoryDTO categoryDTO = null;
+        try {
+            Optional<Category> category = categoryRepository.findById(id);
+            categoryDTO = mapper.apply(category.get());
+            httpStatus= HttpStatus.OK;
+
+            return new ResponseEntity<CategoryDTO>(categoryDTO, httpStatus);
+        } catch (Exception e) {
+            throw new AppServiceException("ERROR OCCURED RETRIEVING CATEGORY DATA!!", 
+                                e.getMessage(), 
+                                HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 }

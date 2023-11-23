@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,6 +20,7 @@ import com.qualitapps.mangoapp.dto.ModuleDTO;
 import com.qualitapps.mangoapp.dto.ResponseDTO;
 import com.qualitapps.mangoapp.entities.Module;
 
+@CrossOrigin(origins = { "http://localhost:3000", "http://localhost:4200" })
 @RestController
 @RequestMapping("/api/v1/module")
 public class ModuleController {   
@@ -96,7 +98,7 @@ public class ModuleController {
     }
 
     @DeleteMapping("/deleteModule")
-    public ResponseEntity<ResponseDTO> deleteModule(@RequestParam Integer moduleId) {
+    public ResponseEntity<ResponseDTO> deleteModule(@RequestParam(value="moduleId") Integer moduleId) {
         try {
             ResponseEntity<Boolean> userExist = moduleService.deleteModule(moduleId);
             ResponseDTO responseDTO = ResponseDTO.builder()
@@ -116,5 +118,28 @@ public class ModuleController {
                 .build();
             return new ResponseEntity<ResponseDTO>(responseDTO, HttpStatus.BAD_REQUEST);
         }
+    }
+
+    @GetMapping("/getModuleById")
+    public ResponseEntity<ResponseDTO> getModuleById(@RequestParam(value = "moduleId") Integer id) {
+        try {
+            ResponseEntity<ModuleDTO> module = moduleService.getModuleById(id);
+            ResponseDTO responseDTO = ResponseDTO.builder()
+                .path("/getModuleById")
+                .status(module.getStatusCode().value())
+                .version("v1")
+                .response(module.getBody())
+                .build();
+            
+            return new ResponseEntity<ResponseDTO>(responseDTO, module.getStatusCode());
+        } catch (Exception e) {
+            ResponseDTO responseDTO = ResponseDTO.builder()
+                .path("/getModuleById")
+                .status(HttpStatus.BAD_REQUEST.value())
+                .version("v1")
+                .response(e.getMessage())
+                .build();
+            return new ResponseEntity<ResponseDTO>(responseDTO, HttpStatus.BAD_REQUEST);
+        }        
     }
 }
