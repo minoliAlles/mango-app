@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.qualitapps.mangoapp.dto.MasterDataDTO;
 import com.qualitapps.mangoapp.dto.ModuleDTO;
 import com.qualitapps.mangoapp.dto.ResponseDTO;
 import com.qualitapps.mangoapp.entities.MasterData;
@@ -113,9 +114,9 @@ public class MasterDataController {
     }
 
     @GetMapping("/getMasterDataById")
-    public ResponseEntity<ResponseDTO> getMasterDataById(@RequestParam(value = "moduleId") Integer id) {
+    public ResponseEntity<ResponseDTO> getMasterDataById(@RequestParam(value = "masterDataId") Integer id) {
         try {
-            ResponseEntity<ModuleDTO> module = masterDataService.getMasterDataById(id);
+            ResponseEntity<MasterDataDTO> module = masterDataService.getMasterDataById(id);
             ResponseDTO responseDTO = ResponseDTO.builder()
                 .path("/getMasterDataById")
                 .status(module.getStatusCode().value())
