@@ -11,9 +11,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.qualitapps.mangoapp.dto.ModuleDTO;
+import com.qualitapps.mangoapp.dto.ModuleFilterDTO;
 import com.qualitapps.mangoapp.entities.Module;
 import com.qualitapps.mangoapp.exception.AppServiceException;
 import com.qualitapps.mangoapp.mapper.ModuleDTOMapper;
+import com.qualitapps.mangoapp.mapper.ModuleFilterMapper;
 import com.qualitapps.mangoapp.repository.ModuleRepository;
 
 @Service
@@ -24,6 +26,9 @@ public class ModuleService {
 
     @Autowired
     private ModuleDTOMapper mapper;
+
+    @Autowired
+    private ModuleFilterMapper moduleFilterMapper;
 
     public ResponseEntity<List<ModuleDTO>> getAllModules() throws AppServiceException {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
@@ -66,6 +71,7 @@ public class ModuleService {
                 updateModule.get().setUpdatedBy("Admin");
                 updateModule.get().setUpdatedDate(new Date());
                 updateModule.get().setModule(moduleDTO.getModule());
+                updateModule.get().setIsDeleted(moduleDTO.getIsDeleted());
                 moduleDTO = mapper.apply(moduleRepository.saveAndFlush(updateModule.get()));
                 httpStatus= HttpStatus.OK;
            }else{
@@ -113,5 +119,21 @@ public class ModuleService {
                                 HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }   
+
+    public ResponseEntity<List<ModuleFilterDTO>> getAllModuleIdsAndNames() throws AppServiceException {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        List<ModuleFilterDTO> modulesFilterDto = null;
+        try {
+            List<Module> module = moduleRepository.findAllActiveModules();
+            modulesFilterDto = moduleFilterMapper.applyFoList(module);
+            httpStatus= HttpStatus.OK;
+
+            return new ResponseEntity<List<ModuleFilterDTO>>(modulesFilterDto, httpStatus);
+        } catch (Exception e) {
+            throw new AppServiceException("ERROR OCCURED RETRIEVING MODULE DATA!!", 
+                                e.getMessage(), 
+                                HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    } 
 
 }

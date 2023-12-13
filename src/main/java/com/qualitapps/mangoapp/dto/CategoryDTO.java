@@ -18,4 +18,5 @@ public class CategoryDTO {
     // private String updatedBy;
     // private Date updatedDate;
     private Boolean isDeleted;
+    private String module;
 }

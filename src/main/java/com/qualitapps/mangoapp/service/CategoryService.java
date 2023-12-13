@@ -10,10 +10,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.qualitapps.mangoapp.dto.CategoryFilterDTO;
 import com.qualitapps.mangoapp.dto.CategoryDTO;
 import com.qualitapps.mangoapp.dto.ModuleDTO;
 import com.qualitapps.mangoapp.entities.Category;
 import com.qualitapps.mangoapp.exception.AppServiceException;
+import com.qualitapps.mangoapp.mapper.CategoryFilterMapper;
 import com.qualitapps.mangoapp.mapper.CategoryMapper;
 import com.qualitapps.mangoapp.repository.CategoryRepository;
 
@@ -25,6 +27,9 @@ public class CategoryService {
 
     @Autowired
     private CategoryMapper mapper;
+
+    @Autowired
+    private CategoryFilterMapper categoryFilterMapper;
 
     public ResponseEntity<List<Category>> getAllCategories() {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
@@ -44,6 +49,7 @@ public class CategoryService {
         try {
             category.setCreatedDate(new Date());
             category.setIsDeleted(false);
+            category.setCategoryTypeKey(category.getModule()+"."+category.getCategoryType());
             category = categoryRepository.save(category);
             httpStatus= HttpStatus.OK;
         } catch (Exception e) {
@@ -56,13 +62,15 @@ public class CategoryService {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         
         try {
-           Optional<Category> updateModule = categoryRepository.findById(category.getId());
-           if(updateModule.isPresent()){
-                updateModule.get().setUpdatedBy("Admin");
-                updateModule.get().setUpdatedDate(new Date());
-                updateModule.get().setCategoryType(category.getCategoryType());
-                updateModule.get().setCategoryTypeKey(category.getCategoryTypeKey());
-                category = categoryRepository.saveAndFlush(updateModule.get());
+           Optional<Category> updateCategory = categoryRepository.findById(category.getId());
+           if(updateCategory.isPresent()){
+                updateCategory.get().setModule(category.getModule());
+                updateCategory.get().setUpdatedBy("Admin");
+                updateCategory.get().setUpdatedDate(new Date());
+                updateCategory.get().setCategoryType(category.getCategoryType());
+                updateCategory.get().setCategoryTypeKey(category.getModule()+"."+category.getCategoryType());
+                updateCategory.get().setIsDeleted(category.getIsDeleted());
+                category = categoryRepository.saveAndFlush(updateCategory.get());
                 httpStatus= HttpStatus.OK;
            }
 
@@ -104,6 +112,34 @@ public class CategoryService {
                                 e.getMessage(), 
                                 HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    public ResponseEntity<List<CategoryFilterDTO>> getAllCategoryNames(String module) {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        List<CategoryFilterDTO> allCategoryNames = new ArrayList<>();
+        try {
+            List<String> allCategories = categoryRepository.findAllCategoryNames(module);
+            allCategoryNames = categoryFilterMapper.applyForList(allCategories);
+            httpStatus= HttpStatus.OK;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return new ResponseEntity<List<CategoryFilterDTO>>(allCategoryNames, httpStatus);
+    }
+
+    public ResponseEntity<List<CategoryDTO>> getCategoryTypeKeyByType(String categoryType) {
+        HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
+        List<CategoryDTO> allCategoryNames = new ArrayList<>();
+        try {
+            List<Category> allCategories = categoryRepository.findCategoryTypeKeysByCategoryType(categoryType);
+            allCategoryNames = mapper.applyForList(allCategories);
+            httpStatus= HttpStatus.OK;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return new ResponseEntity<List<CategoryDTO>>(allCategoryNames, httpStatus);
     }
 
 }

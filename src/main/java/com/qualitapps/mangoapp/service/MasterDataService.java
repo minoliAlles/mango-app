@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import com.qualitapps.mangoapp.dto.MasterDataDTO;
 import com.qualitapps.mangoapp.dto.ModuleDTO;
 import com.qualitapps.mangoapp.entities.MasterData;
+import com.qualitapps.mangoapp.entities.TranslationData;
 import com.qualitapps.mangoapp.exception.AppServiceException;
 import com.qualitapps.mangoapp.mapper.MasterDataMapper;
 import com.qualitapps.mangoapp.repository.MasterDataRepository;
@@ -26,7 +27,7 @@ public class MasterDataService {
     @Autowired
     private MasterDataMapper mapper;
 
-    public ResponseEntity<List<MasterData>> getAllMasterData() {
+    public ResponseEntity<List<MasterDataDTO>> getAllMasterData() {
         HttpStatus httpStatus = HttpStatus.BAD_REQUEST;
         List<MasterData> allData = new ArrayList<>();
         try {
@@ -36,7 +37,7 @@ public class MasterDataService {
             e.printStackTrace();
         }
         
-        return new ResponseEntity<List<MasterData>>(allData, httpStatus);
+        return new ResponseEntity<List<MasterDataDTO>>(mapper.applyForList(allData), httpStatus);
     }
 
     public ResponseEntity<MasterData> saveMasterData(MasterData masterData) {
@@ -44,6 +45,7 @@ public class MasterDataService {
         try {
             masterData.setCreatedDate(new Date());
             masterData.setIsDeleted(false);
+          // masterData.getTranslation().
             masterData = repository.save(masterData);
             httpStatus= HttpStatus.OK;
         } catch (Exception e) {
@@ -61,6 +63,11 @@ public class MasterDataService {
                 updateData.get().setUpdatedBy("Admin");
                 updateData.get().setUpdatedDate(new Date());
                 updateData.get().setData(masterData.getData());
+                updateData.get().setTranslation(masterData.getTranslation());
+                updateData.get().setIsDeleted(masterData.getIsDeleted());
+                updateData.get().setModuleId(masterData.getModuleId());
+                updateData.get().setCategoryType(masterData.getCategoryType());
+                updateData.get().setCategoryTypeKey(masterData.getCategoryTypeKey());
                 masterData = repository.saveAndFlush(updateData.get());
                 httpStatus= HttpStatus.OK;
            }

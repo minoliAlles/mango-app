@@ -32,7 +32,7 @@ public class MasterDataController {
     @GetMapping("/getAllMasterData")
     public ResponseEntity<ResponseDTO> getAllMasterData() {
         
-        ResponseEntity<List<MasterData>> allMasterData = masterDataService.getAllMasterData();
+        ResponseEntity<List<MasterDataDTO>> allMasterData = masterDataService.getAllMasterData();
         ResponseDTO responseDTO = ResponseDTO.builder()
                 .path("/getAllMasterData")
                 .status(allMasterData.getStatusCode().value())

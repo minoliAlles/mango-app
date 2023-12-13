@@ -23,6 +23,7 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 	
+    private String module;
     private String categoryType;
 	private String categoryTypeKey;
     private String createdBy;

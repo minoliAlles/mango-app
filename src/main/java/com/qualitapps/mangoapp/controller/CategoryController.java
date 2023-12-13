@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.qualitapps.mangoapp.dto.CategoryFilterDTO;
 import com.qualitapps.mangoapp.dto.CategoryDTO;
-import com.qualitapps.mangoapp.dto.ModuleDTO;
 import com.qualitapps.mangoapp.dto.ResponseDTO;
 import com.qualitapps.mangoapp.entities.Category;
 import com.qualitapps.mangoapp.service.CategoryService;
@@ -105,5 +105,33 @@ public class CategoryController {
                 .build();
             return new ResponseEntity<ResponseDTO>(responseDTO, HttpStatus.BAD_REQUEST);
         }        
+    }
+
+    @GetMapping("/getAllCategoryNames")
+    public ResponseEntity<ResponseDTO> getAllCategoryNames(@RequestParam(value = "module") String module) {
+        
+        ResponseEntity<List<CategoryFilterDTO>> allCategories = categoryService.getAllCategoryNames(module);
+        ResponseDTO responseDTO = ResponseDTO.builder()
+                .path("/getAllCategoryNames")
+                .status(allCategories.getStatusCode().value())
+                .version("v1")
+                .response(allCategories.getBody())
+                .build();
+            
+        return new ResponseEntity<ResponseDTO>(responseDTO, allCategories.getStatusCode());
+    }
+
+    @GetMapping("/getCategoryTypeKeysByType")
+    public ResponseEntity<ResponseDTO> getCategoryTypeKeysByType(@RequestParam(value = "categoryType") String type) {
+        
+        ResponseEntity<List<CategoryDTO>> allCategories = categoryService.getCategoryTypeKeyByType(type);
+        ResponseDTO responseDTO = ResponseDTO.builder()
+                .path("/getCategoryTypeKeysByType")
+                .status(allCategories.getStatusCode().value())
+                .version("v1")
+                .response(allCategories.getBody())
+                .build();
+            
+        return new ResponseEntity<ResponseDTO>(responseDTO, allCategories.getStatusCode());
     }
 }

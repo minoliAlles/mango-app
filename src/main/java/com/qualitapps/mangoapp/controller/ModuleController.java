@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.qualitapps.mangoapp.service.ModuleService;
 import com.qualitapps.mangoapp.dto.ModuleDTO;
+import com.qualitapps.mangoapp.dto.ModuleFilterDTO;
 import com.qualitapps.mangoapp.dto.ResponseDTO;
 import com.qualitapps.mangoapp.entities.Module;
 
@@ -135,6 +136,29 @@ public class ModuleController {
         } catch (Exception e) {
             ResponseDTO responseDTO = ResponseDTO.builder()
                 .path("/getModuleById")
+                .status(HttpStatus.BAD_REQUEST.value())
+                .version("v1")
+                .response(e.getMessage())
+                .build();
+            return new ResponseEntity<ResponseDTO>(responseDTO, HttpStatus.BAD_REQUEST);
+        }        
+    }
+
+    @GetMapping("/getAllModuleNames")
+    public ResponseEntity<ResponseDTO> getAllModuleNames() {
+        try {
+            ResponseEntity<List<ModuleFilterDTO>> allModules = moduleService.getAllModuleIdsAndNames();
+            ResponseDTO responseDTO = ResponseDTO.builder()
+                .path("/getAllModuleNames")
+                .status(allModules.getStatusCode().value())
+                .version("v1")
+                .response(allModules.getBody())
+                .build();
+            
+            return new ResponseEntity<ResponseDTO>(responseDTO, allModules.getStatusCode());
+        } catch (Exception e) {
+            ResponseDTO responseDTO = ResponseDTO.builder()
+                .path("/getAllModuleNames")
                 .status(HttpStatus.BAD_REQUEST.value())
                 .version("v1")
                 .response(e.getMessage())
